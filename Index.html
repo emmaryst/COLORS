@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de séquences de couleurs HSL avec prévisualisation de graphiques</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>Générateur de séquences de couleurs HSL</h1>
+
+    <div class="control-panel">
+        <div class="control-grid">
+            <div class="control-left">
+                <div class="form-group">
+                    <label for="palette">Ambiance</label>
+                    <select id="palette">
+                        <option value="DELECTABLE">DELECTABLE</option>
+                        <option value="CASUAL">CASUAL</option>
+                        <option value="BOTANICAL">BOTANICAL</option>
+                        <option value="DELICATE">DELICATE</option>
+                        <option value="VENERABLE">VENERABLE</option>
+                        <option value="EARTHY">EARTHY</option>
+                        <option value="VENERABLE">VENERABLE</option>
+                        <option value="EARTHY">EARTHY</option>
+                        <option value="NATURAL">NATURAL</option>
+                        <option value="PIQUANT">PIQUANT</option>
+                        <option value="URBAN">URBAN</option>
+                        <option value="NURTURING">NURTURING</option>
+                        <option value="TROPICAL">TROPICAL</option>
+                        <option value="SUBTLE">SUBTLE</option>
+                        <option value="RICH">RICH</option>
+                        <option value="PLAYFUL">PLAYFUL</option>
+                        <option value="RELIABLE">RELIABLE</option>
+                        <option value="TRANSCENDANT">TRANSCENDANT</option>
+                        <option value="POWERFUL">POWERFUL</option>
+                        <option value="ROMANTIC">ROMANTIC</option>
+                        <option value="PROVOCATIVE">PROVOCATIVE</option>
+                        <option value="NOSTALGIC">NOSTALGIC</option>
+                        <option value="ROBUST">ROBUST</option>
+                        <option value="SOOTHING">SOOTHING</option>
+                        <option value="MAQUILLE">MAQUILLE</option>
+                        <option value="TRIBAL">TRIBAL</option>
+                        <option value="TIMELESS">TIMELESS</option>
+                        <option value="POWER_CLASHING">POWER-CLASHING</option>
+                        <option value="MYSTICAL">MYSTICAL</option>
+                        <option value="GLAMOROUS">GLAMOROUS</option>
+                        <option value="SOPHISTICATED">SOPHISTICATED</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="ACONTINUER">A CONTINUER</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="number-colors">Nombre de couleurs</label>
+                    <input type="number" id="number-colors" min="1" max="30" value="10">
+                </div>
+
+                <div class="form-group">
+                    <label for="random-order">Ordre aléatoire</label>
+                    <input type="checkbox" id="random-order" checked>
+                </div>
+
+                <div class="form-group">
+                    <button id="generate-btn">Générer les couleurs</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="custom-code">
+                        <input type="checkbox" id="use-custom-code"> Utiliser un code personnalisé
+                    </label>
+                    <textarea id="custom-code" placeholder="Coller le code GenerateCustomHSLColors... avec les définitions Array()" disabled>function GenerateCustomHSLColors() {
+  return [
+    Array(40, 60, 60, 80, 0, 20),    // Rouges foncés
+    Array(60, 80, 70, 90, 30, 50),   // Oranges
+    Array(50, 70, 60, 80, 60, 80),   // Jaunes
+    Array(40, 60, 70, 90, 120, 140), // Verts
+    Array(50, 70, 60, 80, 180, 200), // Turquoises
+    Array(40, 60, 70, 90, 240, 260)  // Bleus
+  ];
+</textarea>
+                </div>
+            </div>
+
+            <div class="control-right">
+                <h2>Palette de couleurs</h2>
+                <div id="color-grid" class="color-grid"></div>
+
+                <div class="export-section">
+                    <h2>Export</h2>
+                    <div class="form-group">
+                        <label for="export-format">Format d'export</label>
+                        <div class="export-simple">
+                            <select id="export-format">
+                                <option value="excel-html">Excel avec couleurs (.xls)</option>
+                                <option value="csv">CSV (.csv)</option>
+                            </select>
+                            <button id="export-btn" class="export-btn">Exporter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section pour les graphiques -->
+    <h2>Prévisualisation des graphiques</h2>
+    <div class="charts-panel">
+        <div class="form-group">
+            <label for="chart-type">Type de graphique</label>
+            <select id="chart-type">
+                <option value="bar">Graphique à barres</option>
+                <option value="line">Graphique linéaire</option>
+                <option value="pie">Graphique circulaire</option>
+                <option value="radar">Graphique radar</option>
+                <option value="polarArea">Graphique polaire</option>
+            </select>
+        </div>
+
+        <!-- Ajouter cette nouvelle section pour les boutons de gestion des séries et catégories -->
+
+
+        <div class="form-group series-controls">
+            <label>Gestion des données</label>
+            <div class="button-group">
+                <button id="add-series-btn" class="small-btn">Ajouter une série</button>
+                <button id="remove-series-btn" class="small-btn">Supprimer une série</button>
+            </div>
+
+            <div class="button-group" style="margin-top: 8px;">
+                <button id="add-category-btn" class="small-btn">Ajouter une catégorie</button>
+                <button id="remove-category-btn" class="small-btn">Supprimer une catégorie</button>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-box">
+                <canvas id="chart-preview" width="400" height="300"></canvas>
+            </div>
+
+            <div class="chart-box">
+                <canvas id="chart-preview-2" width="400" height="300"></canvas>
+            </div>
+
+            <div class="chart-box">
+                <canvas id="chart-preview-3" width="400" height="300"></canvas>
+            </div>
+
+            <div class="chart-box">
+                <canvas id="chart-preview-4" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <h2>Détails des couleurs</h2>
+    <div class="table-container">
+        <table id="color-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Couleur</th>
+                    <th>Hex</th>
+                    <th>RGB</th>
+                    <th>HSL</th>
+                    <th>Segment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les détails des couleurs seront insérés ici -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

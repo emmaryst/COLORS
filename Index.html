@@ -6,13 +6,15 @@
     <title>Générateur de séquences de couleurs HSL avec prévisualisation de graphiques</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <a href="https://cirtest.infocubed.com/" target="_blank" rel="noopener noreferrer" class="external-link">CIR Test Infocubed</a>
 </head>
 <body>
-    <h1>Générateur de séquences de couleurs HSL</h1>
+    <h1 class="main-title">Générateur de séquences de couleurs HSL</h1>
 
     <div class="control-panel">
-        <div class="control-grid">
-            <div class="control-left">
+        <div class="control-flex">
+            <!-- Première colonne: contrôles de base -->
+            <div class="control-column basic-controls">
                 <div class="form-group">
                     <label for="palette">Ambiance</label>
                     <select id="palette">
@@ -65,7 +67,10 @@
                 <div class="form-group">
                     <button id="generate-btn">Générer les couleurs</button>
                 </div>
+            </div>
 
+            <!-- Deuxième colonne: code personnalisé -->
+            <div class="control-column custom-code-column">
                 <div class="form-group">
                     <label for="custom-code">
                         <input type="checkbox" id="use-custom-code"> Utiliser un code personnalisé
@@ -79,12 +84,13 @@
     Array(50, 70, 60, 80, 180, 200), // Turquoises
     Array(40, 60, 70, 90, 240, 260)  // Bleus
   ];
-</textarea>
+}</textarea>
                 </div>
             </div>
 
-            <div class="control-right">
-                <h2>Palette de couleurs</h2>
+            <!-- Troisième colonne: palette de couleurs -->
+            <div class="control-column palette-column">
+                <h2 class="palette-title">Palette de couleurs</h2>
                 <div id="color-grid" class="color-grid"></div>
 
                 <div class="export-section">
@@ -104,51 +110,50 @@
         </div>
     </div>
 
-    <!-- Section pour les graphiques -->
-    <h2>Prévisualisation des graphiques</h2>
-    <div class="charts-panel">
-        <div class="form-group">
-            <label for="chart-type">Type de graphique</label>
-            <select id="chart-type">
-                <option value="bar">Graphique à barres</option>
-                <option value="line">Graphique linéaire</option>
-                <option value="pie">Graphique circulaire</option>
-                <option value="radar">Graphique radar</option>
-                <option value="polarArea">Graphique polaire</option>
-            </select>
-        </div>
-
-        <!-- Ajouter cette nouvelle section pour les boutons de gestion des séries et catégories -->
-
-
-        <div class="form-group series-controls">
-            <label>Gestion des données</label>
-            <div class="button-group">
-                <button id="add-series-btn" class="small-btn">Ajouter une série</button>
-                <button id="remove-series-btn" class="small-btn">Supprimer une série</button>
+    <!-- Prévisualisation des graphiques (remontée) -->
+    <div class="charts-section">
+        <h2 class="charts-title">Prévisualisation des graphiques</h2>
+        <div class="charts-panel">
+            <div class="form-group">
+                <label for="chart-type">Type de graphique</label>
+                <select id="chart-type">
+                    <option value="bar">Graphique à barres</option>
+                    <option value="line">Dashboard 1</option>
+                    <option value="pie">Graphique circulaire</option>
+                    <option value="radar">Graphique radar</option>
+                    <option value="polarArea">Graphique polaire</option>
+                </select>
             </div>
 
-            <div class="button-group" style="margin-top: 8px;">
-                <button id="add-category-btn" class="small-btn">Ajouter une catégorie</button>
-                <button id="remove-category-btn" class="small-btn">Supprimer une catégorie</button>
-            </div>
-        </div>
+            <div class="form-group series-controls">
+                <label>Gestion des données</label>
+                <div class="button-group">
+                    <button id="add-series-btn" class="small-btn">Ajouter une série</button>
+                    <button id="remove-series-btn" class="small-btn">Supprimer une série</button>
+                </div>
 
-        <div class="charts-container">
-            <div class="chart-box">
-                <canvas id="chart-preview" width="400" height="300"></canvas>
-            </div>
-
-            <div class="chart-box">
-                <canvas id="chart-preview-2" width="400" height="300"></canvas>
+                <div class="button-group" style="margin-top: 8px;">
+                    <button id="add-category-btn" class="small-btn">Ajouter une catégorie</button>
+                    <button id="remove-category-btn" class="small-btn">Supprimer une catégorie</button>
+                </div>
             </div>
 
-            <div class="chart-box">
-                <canvas id="chart-preview-3" width="400" height="300"></canvas>
-            </div>
+            <div class="charts-container">
+                <div class="chart-box">
+                    <canvas id="chart-preview" width="400" height="300"></canvas>
+                </div>
 
-            <div class="chart-box">
-                <canvas id="chart-preview-4" width="400" height="300"></canvas>
+                <div class="chart-box">
+                    <canvas id="chart-preview-2" width="400" height="300"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <canvas id="chart-preview-3" width="400" height="300"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <canvas id="chart-preview-4" width="400" height="300"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -173,5 +178,24 @@
     </div>
 
     <script src="script.js"></script>
+    <script src="Js/excel/excel-integration.js"></script>
 </body>
 </html>
+
+<!-- Ajouter ce bouton là où vous souhaitez avoir le lien vers votre simulateur -->
+<div class="excel-launcher">
+    <h3>Simulateur Excel</h3>
+    <p>Utilisez cette séquence de couleurs dans le simulateur Excel :</p>
+    <button id="launch-excel" class="btn-excel">Ouvrir le Simulateur Excel</button>
+    <p class="small-text">Note: Excel doit être installé sur votre appareil.</p>
+
+    <!-- Instructions pour l'utilisateur -->
+    <div id="instructions" class="hidden">
+        <ol>
+            <li>La séquence de couleurs a été copiée dans le presse-papiers</li>
+            <li>Le simulateur Excel s'ouvrira automatiquement</li>
+            <li>Collez les couleurs </li>
+            <li>Cliquez sur "SIMULATION" dans l'add-in</li>
+        </ol>
+    </div>
+</div>

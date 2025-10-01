@@ -869,8 +869,8 @@ function updateColorTable() {
 
 
 
-// Fonction pour créer ou mettre à jour les graphiques
-function updateCharts() {
+// Fonction modifiée pour créer ou mettre à jour les graphiques
+function updateChartsold() {
     const chartType = chartTypeSelect.value;
     // Afficher/masquer les boutons selon le type de graphique
     const seriesButtons = document.querySelectorAll('#add-series-btn, #remove-series-btn');
@@ -893,40 +893,53 @@ function updateCharts() {
     // Générer les données
     const chartData = generateChartData();
 
-    // Créer les graphiques
-    createChart('chart-preview', chartType, chartData);
+    // Créer les graphiques selon le type sélectionné
+    if (chartType === 'bar' || chartType === 'stackedBar') {
+        // Cas spécial pour les graphiques à barres/colonnes
 
-    // Pour le deuxième graphique, on utilise un type différent
-    let secondChartType;
-    switch (chartType) {
-        case 'bar':
-            secondChartType = 'line';
-            break;
-        case 'line':
-            secondChartType = 'bar';
-            break;
-        case 'pie':
-            secondChartType = 'doughnut';
-            break;
-        case 'radar':
-            secondChartType = 'polarArea';
-            break;
-        case 'polarArea':
-            secondChartType = 'radar';
-            break;
-        default:
-            secondChartType = 'bar';
+        // 1. Colonnes simples
+        createChart('chart-preview', 'bar', chartData, false, false);
+
+        // 2. Colonnes empilées
+        createChart('chart-preview-2', 'bar', chartData, true, false);
+
+        // 3. Barres horizontales
+        createChart('chart-preview-3', 'bar', chartData, false, true);
+
+        // 4. Barres horizontales empilées
+        createChart('chart-preview-4', 'bar', chartData, true, true);
+    } else {
+        // Pour les autres types de graphiques, on adapte selon le type sélectionné
+        createChart('chart-preview', chartType, chartData);
+
+        // Pour le deuxième graphique
+        let secondChartType;
+        switch (chartType) {
+            case 'line':
+                secondChartType = 'bar';
+                break;
+            case 'pie':
+                secondChartType = 'bar'; // Remplacer doughnut par bar
+                break;
+            case 'radar':
+                secondChartType = 'bar'; // Remplacer polarArea par bar
+                break;
+            case 'polarArea':
+                secondChartType = 'bar'; // Remplacer radar par bar
+                break;
+            default:
+                secondChartType = 'bar';
+        }
+
+        // Créer le second graphique
+        createChart('chart-preview-2', secondChartType, chartData);
+
+        // Pour les graphiques 3 et 4, toujours utiliser des barres horizontales
+        createChart('chart-preview-3', 'bar', chartData, false, true); // Barres horizontales
+        createChart('chart-preview-4', 'bar', chartData, true, true);  // Barres horizontales empilées
     }
-
-    createChart('chart-preview-2', secondChartType, chartData);
-
-    // Ajouter les graphiques 3 et 4
-    const thirdChartType = (chartType === 'pie' || chartType === 'doughnut') ? 'polarArea' : 'pie';
-    createChart('chart-preview-3', thirdChartType, chartData);
-
-    const fourthChartType = (chartType === 'radar' || chartType === 'polarArea') ? 'line' : 'radar';
-    createChart('chart-preview-4', fourthChartType, chartData);
 }
+
 
 // Fonction modifiée pour générer des données pour les graphiques
 // Suppression de l'option 'quarterly' et utilisation du nombre de séries variable
@@ -959,8 +972,8 @@ function generateChartData() {
     };
 }
 
-// Fonction pour créer un graphique
-function createChart(canvasId, type, data) {
+// Fonction modifiée pour créer un graphique avec options pour barres empilées et horizontales
+function createChart(canvasId, type, data, isStacked = false, isHorizontal = false) {
     const ctx = document.getElementById(canvasId).getContext('2d');
 
     // Configurations spéciales selon le type
@@ -976,19 +989,30 @@ function createChart(canvasId, type, data) {
                 },
                 title: {
                     display: true,
-                    text: `Graphique ${type.charAt(0).toUpperCase() + type.slice(1)}`
+                    text: getChartTitle(type, isStacked, isHorizontal)
                 }
             }
         }
     };
 
-    // Réduire la taille du premier graphique mais non !!
-    if (canvasId === 'chart-preview') {
-        ctx.canvas.parentNode.style.height = '300px'; // Hauteur réduite
+    // Configuration pour les barres horizontales (indexAxis: 'y')
+    if (isHorizontal && type === 'bar') {
+        config.options.indexAxis = 'y';
+    }
+
+    // Configuration pour les barres empilées
+    if (isStacked && type === 'bar') {
+        config.options.scales = {
+            x: {
+                stacked: true
+            },
+            y: {
+                stacked: true
+            }
+        };
     }
 
     // Configurations spéciales pour les graphiques en camembert et polaires
-
     if (['pie', 'doughnut', 'polarArea'].includes(type)) {
         // Pour ces types, on utilise un seul dataset avec plusieurs couleurs
         const allColors = generatedColors.map(color => color.hex);
@@ -1005,11 +1029,104 @@ function createChart(canvasId, type, data) {
         };
     }
 
-    // Appliquer uniquement le thème de fond (pas d'autres styles)
-
     // Créer et stocker l'instance de graphique
     chartInstances[canvasId] = new Chart(ctx, config);
 }
+
+// Fonction pour générer un titre descriptif pour chaque graphique
+function getChartTitle(type, isStacked, isHorizontal) {
+    if (type === 'bar') {
+        if (isHorizontal) {
+            return isStacked ? 'Barres Horizontales Empilées' : 'Barres Horizontales';
+        } else {
+            return isStacked ? 'Colonnes Empilées' : 'Colonnes Simples';
+        }
+    } else {
+        return `Graphique ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+    }
+}
+
+// Fonction modifiée pour créer ou mettre à jour les graphiques
+function updateCharts() {
+    const chartType = chartTypeSelect.value;
+    // Afficher/masquer les boutons selon le type de graphique
+    const seriesButtons = document.querySelectorAll('#add-series-btn, #remove-series-btn');
+    const categoryButtons = document.querySelectorAll('#add-category-btn, #remove-category-btn');
+
+    if (['pie', 'doughnut', 'polarArea'].includes(chartType)) {
+        // Pour les graphiques circulaires, afficher les boutons de catégories
+        seriesButtons.forEach(btn => btn.style.display = 'none');
+        categoryButtons.forEach(btn => btn.style.display = 'inline-block');
+    } else {
+        // Pour les autres graphiques, afficher les boutons de séries
+        seriesButtons.forEach(btn => btn.style.display = 'inline-block');
+        categoryButtons.forEach(btn => btn.style.display = 'none');
+    }
+
+    // Nettoyer les graphiques existants
+    Object.values(chartInstances).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') {
+            chart.destroy();
+        }
+    });
+    chartInstances = {};
+
+    // Vérifier que les couleurs sont générées
+    if (!generatedColors || generatedColors.length === 0) {
+        console.error("Aucune couleur générée. Génération de couleurs par défaut.");
+        generateDefaultColors();
+    }
+
+    // Générer les données
+    const chartData = generateChartData();
+
+    // Créer les graphiques selon le type sélectionné
+    if (chartType === 'bar' || chartType === 'stackedBar') {
+        // Cas spécial pour les graphiques à barres/colonnes
+
+        // 1. Colonnes simples
+        createChart('chart-preview', 'bar', chartData, false, false);
+
+        // 2. Colonnes empilées
+        createChart('chart-preview-2', 'bar', chartData, true, false);
+
+        // 3. Barres horizontales
+        createChart('chart-preview-3', 'bar', chartData, false, true);
+
+        // 4. Barres horizontales empilées
+        createChart('chart-preview-4', 'bar', chartData, true, true);
+    } else {
+        // Pour les autres types de graphiques, on adapte selon le type sélectionné
+        createChart('chart-preview', chartType, chartData);
+
+        // Pour le deuxième graphique
+        let secondChartType;
+        switch (chartType) {
+            case 'line':
+                secondChartType = 'bar';
+                break;
+            case 'pie':
+                secondChartType = 'bar'; // Remplacer doughnut par bar
+                break;
+            case 'radar':
+                secondChartType = 'bar'; // Remplacer polarArea par bar
+                break;
+            case 'polarArea':
+                secondChartType = 'bar'; // Remplacer radar par bar
+                break;
+            default:
+                secondChartType = 'bar';
+        }
+
+        // Créer le second graphique
+        createChart('chart-preview-2', secondChartType, chartData);
+
+        // Pour les graphiques 3 et 4, toujours utiliser des barres horizontales
+        createChart('chart-preview-3', 'bar', chartData, false, true); // Barres horizontales
+        createChart('chart-preview-4', 'bar', chartData, true, true);  // Barres horizontales empilées
+    }
+}
+
 
 // Fonctions pour ajouter et supprimer des séries
 function addSeries() {
@@ -1115,7 +1232,7 @@ function exportToExcelHTML() {
   </html>
   `;
 
-    downloadFile(htmlContent, `palette_${selectedPalette}_${generatedColors.length}.xlsx`, 'application/vnd.ms-excel');
+    downloadFile(htmlContent, `palette_${selectedPalette}_${generatedColors.length}.xls`, 'application/vnd.ms-excel');
  
 }
 
@@ -1422,3 +1539,76 @@ updateColorGrid = function () {
 if (document.querySelector('#color-grid')) {
     enableDragAndDrop();
 }
+
+
+// Fonction pour lancer Excel avec le simulateur et copier les couleurs
+function setupExcelLauncher() {
+    const launchButton = document.getElementById('launch-excel');
+    if (!launchButton) return; // Si le bouton n'existe pas, ne rien faire
+
+    const instructions = document.getElementById('instructions');
+
+    launchButton.addEventListener('click', function () {
+        // 1. Récupérer la séquence de couleurs générée
+        const colorsSequence = getGeneratedColors();
+
+        // 2. Copier dans le presse-papiers
+        copyToClipboard(colorsSequence);
+
+        // 3. Afficher les instructions
+        if (instructions) {
+            instructions.classList.remove('hidden');
+        }
+
+        // 4. Lancer Excel avec le fichier simulateur
+        setTimeout(function () {
+            window.location.href = "ms-excel:ofe|u|file:///C:\Users\Emmanuelle\Documents\GitHub\COLORS\simulateur.xlsx";
+        }, 1000);
+    });
+}
+
+// Fonction pour obtenir les couleurs générées
+function getGeneratedColors() {
+    // Adaptez cette fonction selon la structure de votre code
+    // Comment les couleurs sont-elles stockées dans votre application ?
+
+    // Exemple: Si vous avez un tableau de couleurs dans une variable globale
+    // return colorArray.map(color => color.hsl).join(',');
+
+    // Exemple: Si les couleurs sont dans le DOM
+    const colorElements = document.querySelectorAll('.color-sample');
+    if (colorElements && colorElements.length > 0) {
+        return Array.from(colorElements).map(el => {
+            // Adapté selon la façon dont vos données de couleur sont stockées dans le DOM
+            return el.getAttribute('data-hsl') || el.getAttribute('data-color') || el.style.backgroundColor;
+        }).join(',');
+    }
+
+    // Valeur par défaut
+    return "HSL(0,70%,50%),HSL(60,70%,50%),HSL(120,70%,50%),HSL(180,70%,50%),HSL(240,70%,50%)";
+}
+
+// Fonction pour copier dans le presse-papiers
+function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    // Feedback visuel
+    const launchButton = document.getElementById('launch-excel');
+    if (launchButton) {
+        const originalText = launchButton.textContent;
+        launchButton.textContent = "Couleurs copiées! Excel s'ouvre...";
+        setTimeout(function () {
+            launchButton.textContent = originalText;
+        }, 3000);
+    }
+}
+
+// Initialiser l'intégration Excel une fois que le DOM est chargé
+document.addEventListener('DOMContentLoaded', function () {
+    setupExcelLauncher();
+});
